@@ -19,19 +19,20 @@ namespace liwq.CLib
 
         unsafe public static void* malloc(int size)
         {
-            void* p = Marshal.AllocHGlobal(size + 4).ToPointer();
-            ((int*)p)[0] = size;
-            return (void*)(((int)p) + 4);
+            int* p = (int*)Marshal.AllocHGlobal(size + 4);
+            p[0] = size;
+            return (void*)(p + 1);
         }
         unsafe public static void free(void* memblock)
         {
-            Marshal.FreeHGlobal((IntPtr)((int)memblock - 4));
+            Marshal.FreeHGlobal((IntPtr)(((int*)memblock) - 1));
         }
         unsafe public static void* realloc(void* memblock, int newSize)
         {
             void* newMemblock = malloc(newSize);
-            int oldSize = ((int*)((int)memblock - 4))[0];
-            CString.memcpy(newMemblock, memblock, (uint)oldSize);
+            int oldSize = ((int*)memblock)[-1];
+            newSize = Math.Min(oldSize, newSize);
+            CString.memcpy(newMemblock, memblock, (uint)newSize);
             free(memblock);
             return newMemblock;
         }
@@ -64,25 +65,25 @@ namespace liwq.CLib
         unsafe public static void _memcpyi32(void* dest, void* src)
         {
             _memcpyi16(dest, src);
-            _memcpyi16((void*)((int)dest + 16), (void*)((int)src + 16));
+            _memcpyi16((void*)((byte*)dest + 16), (void*)((byte*)src + 16));
         }
         unsafe public static void _memcpyi64(void* dest, void* src)
         {
             _memcpyi16(dest, src);
-            _memcpyi16((void*)((int)dest + 16), (void*)((int)src + 16));
-            _memcpyi16((void*)((int)dest + 32), (void*)((int)src + 32));
-            _memcpyi16((void*)((int)dest + 48), (void*)((int)src + 48));
+            _memcpyi16((void*)((byte*)dest + 16), (void*)((byte*)src + 16));
+            _memcpyi16((void*)((byte*)dest + 32), (void*)((byte*)src + 32));
+            _memcpyi16((void*)((byte*)dest + 48), (void*)((byte*)src + 48));
         }
         unsafe public static void _memcpyi128(void* dest, void* src)
         {
             _memcpyi16(dest, src);
-            _memcpyi16((void*)((int)dest + 16), (void*)((int)src + 16));
-            _memcpyi16((void*)((int)dest + 32), (void*)((int)src + 32));
-            _memcpyi16((void*)((int)dest + 48), (void*)((int)src + 48));
-            _memcpyi16((void*)((int)dest + 64), (void*)((int)src + 64));
-            _memcpyi16((void*)((int)dest + 80), (void*)((int)src + 80));
-            _memcpyi16((void*)((int)dest + 96), (void*)((int)src + 96));
-            _memcpyi16((void*)((int)dest + 112), (void*)((int)src + 112));
+            _memcpyi16((void*)((byte*)dest + 16), (void*)((byte*)src + 16));
+            _memcpyi16((void*)((byte*)dest + 32), (void*)((byte*)src + 32));
+            _memcpyi16((void*)((byte*)dest + 48), (void*)((byte*)src + 48));
+            _memcpyi16((void*)((byte*)dest + 64), (void*)((byte*)src + 64));
+            _memcpyi16((void*)((byte*)dest + 80), (void*)((byte*)src + 80));
+            _memcpyi16((void*)((byte*)dest + 96), (void*)((byte*)src + 96));
+            _memcpyi16((void*)((byte*)dest + 112), (void*)((byte*)src + 112));
         }
 
         /////////////////////////////////////////////////
@@ -102,33 +103,33 @@ namespace liwq.CLib
         unsafe public static void _memcpys16(void* dest, void* src)
         {
             _memcpys8(dest, src);
-            _memcpys8((void*)((int)dest + 8), (void*)((int)src + 8));
+            _memcpys8((void*)((byte*)dest + 8), (void*)((byte*)src + 8));
         }
         unsafe public static void _memcpys32(void* dest, void* src)
         {
             _memcpys8(dest, src);
-            _memcpys8((void*)((int)dest + 8), (void*)((int)src + 8));
-            _memcpys8((void*)((int)dest + 16), (void*)((int)src + 16));
-            _memcpys8((void*)((int)dest + 24), (void*)((int)src + 24));
+            _memcpys8((void*)((byte*)dest + 8), (void*)((byte*)src + 8));
+            _memcpys8((void*)((byte*)dest + 16), (void*)((byte*)src + 16));
+            _memcpys8((void*)((byte*)dest + 24), (void*)((byte*)src + 24));
         }
         unsafe public static void _memcpys64(void* dest, void* src)
         {
             _memcpys8(dest, src);
-            _memcpys8((void*)((int)dest + 8), (void*)((int)src + 8));
-            _memcpys8((void*)((int)dest + 16), (void*)((int)src + 16));
-            _memcpys8((void*)((int)dest + 24), (void*)((int)src + 24));
-            _memcpys8((void*)((int)dest + 32), (void*)((int)src + 32));
-            _memcpys8((void*)((int)dest + 40), (void*)((int)src + 40));
-            _memcpys8((void*)((int)dest + 48), (void*)((int)src + 48));
-            _memcpys8((void*)((int)dest + 56), (void*)((int)src + 56));
+            _memcpys8((void*)((byte*)dest + 8), (void*)((byte*)src + 8));
+            _memcpys8((void*)((byte*)dest + 16), (void*)((byte*)src + 16));
+            _memcpys8((void*)((byte*)dest + 24), (void*)((byte*)src + 24));
+            _memcpys8((void*)((byte*)dest + 32), (void*)((byte*)src + 32));
+            _memcpys8((void*)((byte*)dest + 40), (void*)((byte*)src + 40));
+            _memcpys8((void*)((byte*)dest + 48), (void*)((byte*)src + 48));
+            _memcpys8((void*)((byte*)dest + 56), (void*)((byte*)src + 56));
         }
         unsafe public static void _memcpys128(void* dest, void* src)
         {
             for (int i = 0; i < 16; i++)
             {
                 _memcpyi16(dest, src);
-                dest = (void*)((int)dest + 8);
-                src = (void*)((int)src + 8);
+                dest = (void*)((byte*)dest + 8);
+                src = (void*)((byte*)src + 8);
             }
         }
 
@@ -176,27 +177,27 @@ namespace liwq.CLib
         unsafe public static void _memseti32(void* dest, int c)
         {
             _memseti16(dest, c);
-            _memseti16((void*)((int)dest + 16), c);
+            _memseti16((void*)((byte*)dest + 16), c);
         }
         /// <param name="c">注意是4字节</param>
         unsafe public static void _memseti64(void* dest, int c)
         {
             _memseti16(dest, c);
-            _memseti16((void*)((int)dest + 16), c);
-            _memseti16((void*)((int)dest + 32), c);
-            _memseti16((void*)((int)dest + 48), c);
+            _memseti16((void*)((byte*)dest + 16), c);
+            _memseti16((void*)((byte*)dest + 32), c);
+            _memseti16((void*)((byte*)dest + 48), c);
         }
         /// <param name="c">注意是4字节</param>
         unsafe public static void _memseti128(void* dest, int c)
         {
             _memseti16(dest, c);
-            _memseti16((void*)((int)dest + 16), c);
-            _memseti16((void*)((int)dest + 32), c);
-            _memseti16((void*)((int)dest + 48), c);
-            _memseti16((void*)((int)dest + 64), c);
-            _memseti16((void*)((int)dest + 80), c);
-            _memseti16((void*)((int)dest + 96), c);
-            _memseti16((void*)((int)dest + 112), c);
+            _memseti16((void*)((byte*)dest + 16), c);
+            _memseti16((void*)((byte*)dest + 32), c);
+            _memseti16((void*)((byte*)dest + 48), c);
+            _memseti16((void*)((byte*)dest + 64), c);
+            _memseti16((void*)((byte*)dest + 80), c);
+            _memseti16((void*)((byte*)dest + 96), c);
+            _memseti16((void*)((byte*)dest + 112), c);
         }
 
         #endregion FASTEST
@@ -236,12 +237,12 @@ namespace liwq.CLib
                     uint buffer = ((uint*)buf)[0] ^ mask;
                     if (((buffer - 0x01010101) & ~buffer & 0x80808080) != 0)
                     {
-                        if (((byte*)buf)[0] == c) return (void*)((int)buf + 0);
-                        if (((byte*)buf)[1] == c) return (void*)((int)buf + 1);
-                        if (((byte*)buf)[2] == c) return (void*)((int)buf + 2);
-                        if (((byte*)buf)[3] == c) return (void*)((int)buf + 3);
+                        if (((byte*)buf)[0] == c) return (void*)((byte*)buf + 0);
+                        if (((byte*)buf)[1] == c) return (void*)((byte*)buf + 1);
+                        if (((byte*)buf)[2] == c) return (void*)((byte*)buf + 2);
+                        if (((byte*)buf)[3] == c) return (void*)((byte*)buf + 3);
                     }
-                    buf = (void*)((int)buf + 4);
+                    buf = (void*)((byte*)buf + 4);
                     count -= LITTLE_BLOCK_SIZE;
                 }
             }
@@ -250,7 +251,7 @@ namespace liwq.CLib
                 do
                 {
                     if (((byte*)buf)[0] == c) return buf;
-                    buf = (void*)((int)buf + 1);
+                    buf = (void*)((byte*)buf + 1);
                     count--;
                 } while (count != 0);
             }
@@ -280,8 +281,8 @@ namespace liwq.CLib
                 {
                     if (((uint*)buf1)[0] != ((uint*)buf2)[0])
                         break;
-                    buf1 = (void*)((int)buf1 + 4);
-                    buf2 = (void*)((int)buf2 + 4);
+                    buf1 = (void*)((byte*)buf1 + 4);
+                    buf2 = (void*)((byte*)buf2 + 4);
                     count -= LITTLE_BLOCK_SIZE;
                 }
                 while (count >= LITTLE_BLOCK_SIZE);
@@ -293,8 +294,8 @@ namespace liwq.CLib
                     --count;
                     if (((byte*)buf1)[0] != ((byte*)buf2)[0])
                         return ((byte*)buf1)[0] - ((byte*)buf2)[0];
-                    buf1 = (void*)((int)buf1 + 1);
-                    buf2 = (void*)((int)buf2 + 1);
+                    buf1 = (void*)((byte*)buf1 + 1);
+                    buf2 = (void*)((byte*)buf2 + 1);
                 } while (count != 0);
             }
             return 0;
@@ -333,22 +334,22 @@ namespace liwq.CLib
                 ((int*)dest)[1] = ((int*)src)[1];
                 ((int*)dest)[2] = ((int*)src)[2];
                 ((int*)dest)[3] = ((int*)src)[3];
-                dest = (void*)((int)dest + 16);
-                src = (void*)((int)src + 16);
+                dest = (void*)((byte*)dest + 16);
+                src = (void*)((byte*)src + 16);
                 count -= 16;
             }
             while (count >= 4)
             {
                 ((int*)dest)[0] = ((int*)src)[0];
-                dest = (void*)((int)dest + 4);
-                src = (void*)((int)src + 4);
+                dest = (void*)((byte*)dest + 4);
+                src = (void*)((byte*)src + 4);
                 count -= 4;
             }
             while (count-- != 0)
             {
                 ((byte*)dest)[0] = ((byte*)src)[0];
-                dest = (void*)((int)dest + 1);
-                src = (void*)((int)src + 1);
+                dest = (void*)((byte*)dest + 1);
+                src = (void*)((byte*)src + 1);
             }
             return ret;
         }
@@ -361,23 +362,23 @@ namespace liwq.CLib
                 ((short*)dest)[1] = ((short*)src)[1];
                 ((short*)dest)[2] = ((short*)src)[2];
                 ((short*)dest)[3] = ((short*)src)[3];
-                dest = (void*)((int)dest + 8);
-                src = (void*)((int)src + 8);
+                dest = (void*)((byte*)dest + 8);
+                src = (void*)((byte*)src + 8);
                 count -= 8;
             }
             while (count >= 4)
             {
                 ((short*)dest)[0] = ((short*)src)[0];
                 ((short*)dest)[1] = ((short*)src)[1];
-                dest = (void*)((int)dest + 4);
-                src = (void*)((int)src + 4);
+                dest = (void*)((byte*)dest + 4);
+                src = (void*)((byte*)src + 4);
                 count -= 4;
             }
             while (count-- != 0)
             {
                 ((byte*)dest)[0] = ((byte*)src)[0];
-                dest = (void*)((int)dest + 1);
-                src = (void*)((int)src + 1);
+                dest = (void*)((byte*)dest + 1);
+                src = (void*)((byte*)src + 1);
             }
             return ret;
         }
@@ -390,15 +391,15 @@ namespace liwq.CLib
                 ((byte*)dest)[1] = ((byte*)src)[1];
                 ((byte*)dest)[2] = ((byte*)src)[2];
                 ((byte*)dest)[3] = ((byte*)src)[3];
-                dest = (void*)((int)dest + 4);
-                src = (void*)((int)src + 4);
+                dest = (void*)((byte*)dest + 4);
+                src = (void*)((byte*)src + 4);
                 count -= 4;
             }
             while (count-- != 0)
             {
                 ((byte*)dest)[0] = ((byte*)src)[0];
-                dest = (void*)((int)dest + 1);
-                src = (void*)((int)src + 1);
+                dest = (void*)((byte*)dest + 1);
+                src = (void*)((byte*)src + 1);
             }
             return ret;
         }
@@ -423,12 +424,12 @@ namespace liwq.CLib
             if (((uint)src < (uint)dest) && ((uint)dest < (uint)src + count))
             {
                 void* ret = dest;
-                src = (void*)((uint)src + count);
-                dest = (void*)((uint)dest + count);
+                src = (void*)((byte*)src + count);
+                dest = (void*)((byte*)dest + count);
                 while (count-- != 0)
                 {
-                    dest = (void*)((uint)dest - 1);
-                    src = (void*)((uint)src - 1);
+                    dest = (void*)((byte*)dest - 1);
+                    src = (void*)((byte*)src - 1);
                     ((byte*)dest)[0] = ((byte*)src)[0];
                 }
                 return ret;
@@ -451,19 +452,19 @@ namespace liwq.CLib
                 ((int*)dest)[1] = c;
                 ((int*)dest)[2] = c;
                 ((int*)dest)[3] = c;
-                dest = (void*)((int)dest + 16);
+                dest = (void*)((byte*)dest + 16);
                 count -= 16;
             }
             while (count >= 4)
             {
                 ((int*)dest)[0] = c;
-                dest = (void*)((int)dest + 4);
+                dest = (void*)((byte*)dest + 4);
                 count -= 4;
             }
             while (count-- != 0)
             {
                 ((byte*)(dest))[0] = (byte)c;
-                dest = (void*)((int)dest + 1);
+                dest = (void*)((byte*)dest + 1);
             }
             return ret;
         }
@@ -481,7 +482,7 @@ namespace liwq.CLib
             for (int i = (int)dest & 3; i != 0; i++)
             {
                 ((byte*)dest)[0] = (byte)c;
-                dest = (void*)((int)dest + 1);
+                dest = (void*)((byte*)dest + 1);
                 count -= 1;
             }
             c |= c << 8;
@@ -492,19 +493,19 @@ namespace liwq.CLib
                 ((int*)dest)[1] = c;
                 ((int*)dest)[2] = c;
                 ((int*)dest)[3] = c;
-                dest = (void*)((int)dest + 16);
+                dest = (void*)((byte*)dest + 16);
                 count -= 16;
             }
             while (count >= 4)
             {
                 ((int*)dest)[0] = c;
-                dest = (void*)((int)dest + 4);
+                dest = (void*)((byte*)dest + 4);
                 count -= 4;
             }
             while (count-- != 0)
             {
                 ((byte*)(dest))[0] = (byte)c;
-                dest = (void*)((int)dest + 1);
+                dest = (void*)((byte*)dest + 1);
             }
             return ret;
         }
@@ -550,7 +551,7 @@ namespace liwq.CLib
                 uint v = ((uint*)strDestination)[0];
                 if (((v - 0x1010101) & ~v & 0x80808080) == 0)
                 {
-                    do { strDestination = (sbyte*)((int)strDestination + 4); v = ((uint*)strDestination)[0]; }
+                    do { strDestination = (sbyte*)((byte*)strDestination + 4); v = ((uint*)strDestination)[0]; }
                     while (((v - 0x1010101) & ~v & 0x80808080) == 0);
                 }
             }
@@ -589,7 +590,7 @@ namespace liwq.CLib
                 {
                     do
                     {
-                        str = (sbyte*)((int)str + 4);
+                        str = (sbyte*)((byte*)str + 4);
                         ui = ((uint*)str)[0];
                         chk = ((ui - 0x1010101) & ~ui & 0x80808080);
                     } while ((chk == 0) && ((chk ^ mask) == 0));
@@ -705,8 +706,8 @@ namespace liwq.CLib
                     do
                     {
                         ((uint*)strDestination)[0] = v;
-                        strDestination = (sbyte*)((int)strDestination + 4);
-                        strSource = (sbyte*)((int)strSource + 4);
+                        strDestination = (sbyte*)((byte*)strDestination + 4);
+                        strSource = (sbyte*)((byte*)strSource + 4);
                         v = ((uint*)strSource)[0];
                     }
                     while ((((v - 0x1010101) & ~v) & 0x80808080) == 0);
@@ -792,7 +793,7 @@ namespace liwq.CLib
             {
                 while ((((((uint*)String)[0] - 0x1010101) & ~((uint*)String)[0]) & 0x80808080) == 0)
                 {
-                    String = (sbyte*)((int)String + 4);
+                    String = (sbyte*)((byte*)String + 4);
                 }
             }
             sbyte b = String[0];
@@ -1383,19 +1384,19 @@ namespace liwq.CLib
                 byte* dst = (byte*)dst0;
                 while (count >= 4)
                 {
-                    ((byte*)((int)dst + 0))[0] = (byte)(((short*)((int)src + 0))[0]);
-                    ((byte*)((int)dst + 1))[0] = (byte)(((short*)((int)src + 2))[0]);
-                    ((byte*)((int)dst + 2))[0] = (byte)(((short*)((int)src + 4))[0]);
-                    ((byte*)((int)dst + 3))[0] = (byte)(((short*)((int)src + 6))[0]);
-                    src = (ushort*)((int)src + 8);
-                    dst = (byte*)((int)dst + 4);
+                    ((byte*)((byte*)dst + 0))[0] = (byte)(((short*)((byte*)src + 0))[0]);
+                    ((byte*)((byte*)dst + 1))[0] = (byte)(((short*)((byte*)src + 2))[0]);
+                    ((byte*)((byte*)dst + 2))[0] = (byte)(((short*)((byte*)src + 4))[0]);
+                    ((byte*)((byte*)dst + 3))[0] = (byte)(((short*)((byte*)src + 6))[0]);
+                    src = (ushort*)((byte*)src + 8);
+                    dst = (byte*)((byte*)dst + 4);
                     count -= 4;
                 }
                 while (count-- != 0)
                 {
                     ((byte*)dst)[0] = (byte)((ushort*)src)[0];
-                    src = (ushort*)((int)src + 2);
-                    dst = (byte*)((int)dst + 1);
+                    src = (ushort*)((byte*)src + 2);
+                    dst = (byte*)((byte*)dst + 1);
                 }
             }
             this._array = buffer;
@@ -1511,19 +1512,19 @@ namespace liwq.CLib
                 byte* src = (byte*)src0;
                 while (count >= 4)
                 {
-                    ((short*)((int)dest + 0))[0] = ((byte*)((int)src + 0))[0];
-                    ((short*)((int)dest + 2))[0] = ((byte*)((int)src + 1))[0];
-                    ((short*)((int)dest + 4))[0] = ((byte*)((int)src + 2))[0];
-                    ((short*)((int)dest + 6))[0] = ((byte*)((int)src + 3))[0];
-                    dest = (ushort*)((int)dest + 8);
-                    src = (byte*)((int)src + 4);
+                    ((short*)((byte*)dest + 0))[0] = ((byte*)((byte*)src + 0))[0];
+                    ((short*)((byte*)dest + 2))[0] = ((byte*)((byte*)src + 1))[0];
+                    ((short*)((byte*)dest + 4))[0] = ((byte*)((byte*)src + 2))[0];
+                    ((short*)((byte*)dest + 6))[0] = ((byte*)((byte*)src + 3))[0];
+                    dest = (ushort*)((byte*)dest + 8);
+                    src = (byte*)((byte*)src + 4);
                     count -= 4;
                 }
                 while (count-- != 0)
                 {
                     ((ushort*)dest)[0] = ((byte*)src)[0];
-                    dest = (ushort*)((int)dest + 2);
-                    src = (byte*)((int)src + 1);
+                    dest = (ushort*)((byte*)dest + 2);
+                    src = (byte*)((byte*)src + 1);
                 }
             }
             return ret;
