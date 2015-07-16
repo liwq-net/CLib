@@ -29,12 +29,24 @@ namespace liwq.CLib
         }
         unsafe public static void* realloc(void* memblock, int newSize)
         {
-            void* newMemblock = malloc(newSize);
-            int oldSize = ((int*)memblock)[-1];
-            newSize = Math.Min(oldSize, newSize);
-            CString.memcpy(newMemblock, memblock, (uint)newSize);
-            free(memblock);
-            return newMemblock;
+            if (memblock == null)
+            {
+                return malloc(newSize);
+            }
+            else if (newSize == 0)
+            {
+                free(memblock);
+            }
+            else
+            {
+                void* newMemblock = malloc(newSize);
+                int oldSize = ((int*)memblock)[-1];
+                newSize = Math.Min(oldSize, newSize);
+                CString.memcpy(newMemblock, memblock, (uint)newSize);
+                free(memblock);
+                return newMemblock;
+            }
+            return null;
         }
     }
     #endregion //CStdlib
