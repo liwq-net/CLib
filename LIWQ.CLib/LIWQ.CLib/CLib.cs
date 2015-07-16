@@ -19,11 +19,21 @@ namespace liwq.CLib
 
         unsafe public static void* malloc(int size)
         {
-            return Marshal.AllocHGlobal(size).ToPointer();
+            void* p = Marshal.AllocHGlobal(size + 4).ToPointer();
+            ((int*)p)[0] = size;
+            return (void*)(((int)p) + 4);
         }
         unsafe public static void free(void* memblock)
         {
-            Marshal.FreeHGlobal((IntPtr)memblock);
+            Marshal.FreeHGlobal((IntPtr)((int)memblock - 4));
+        }
+        unsafe public static void* realloc(void* memblock, int newSize)
+        {
+            void* newMemblock = malloc(newSize);
+            int oldSize = ((int*)((int)memblock - 4))[0];
+            CString.memcpy(newMemblock, memblock, (uint)oldSize);
+            free(memblock);
+            return newMemblock;
         }
     }
     #endregion //CStdlib
@@ -1528,16 +1538,4 @@ namespace liwq.CLib
 
     }
     #endregion //AnsiString
-
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            AnsiString a = new AnsiString("Hello  kitty");
-            AnsiString b = new AnsiString("Dear ");
-            AnsiString s = a.Remove(6, 1).Replace((byte)'k', (byte)'K');
-            Console.WriteLine(b + s.ToString());
-            Console.ReadLine();
-        }
-    }
 }
